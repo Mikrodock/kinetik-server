@@ -1,15 +1,32 @@
 package models
 
-import "time"
+import (
+	composeTypes "github.com/docker/cli/cli/compose/types"
+	"github.com/docker/docker/api/types"
+)
 
 type Service struct {
-	ID                *int                `json:"id,omitempty"`
-	Name              string              `json:"name,omitempty"`
-	CreationDate      time.Time           `json:"creation_date,omitempty"`
-	UpdateDate        time.Time           `json:"update_date,omitempty"`
-	GlobalState       *StateValue         `json:"global_state,omitempty"`
-	RegisteredMetrics []*MetricDescriptor `json:"registered_metrics,omitempty"`
-	Metrics           []*MetricValue      `json:"metrics,omitempty"`
-	Instances         []*Instance         `json:"instances,omitempty"`
-	Nodes             []*Node             `json:"nodes,omitempty"`
+	StackName       string
+	ServiceName     string
+	ContainerConfig *types.ContainerCreateConfig
+	Instances       []*Instance
+	Constraints     *composeTypes.Resource
+	Ports           []composeTypes.ServicePortConfig
+}
+
+func NewService(stackName, serviceName string, cntConfig *types.ContainerCreateConfig) *Service {
+	return &Service{
+		StackName:       stackName,
+		ServiceName:     serviceName,
+		ContainerConfig: cntConfig,
+		Instances:       make([]*Instance, 0),
+	}
+}
+
+func (s *Service) AddInstance(instance *Instance) {
+	s.Instances = append(s.Instances, instance)
+}
+
+func (s *Service) GetInstances() []*Instance {
+	return s.Instances
 }
