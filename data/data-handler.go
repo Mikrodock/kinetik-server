@@ -12,11 +12,12 @@ type DataHandler interface {
 	GetNode(nodeId string) *models.Node
 	AddNode(nodeid string, node *models.Node) error
 	DeleteNode(nodeID int) error
+	GetService(identifier string) *models.Service
 	GetServices() []*models.Service
 	AddService(service *models.Service) error
 	DeleteService(serviceID int) error
 	GetInstances() []*models.Instance
-	AddInstance(instance *models.Instance) error
+	AddInstance(stack string, service string, instance *models.Instance) error
 	DeleteInstance(instanceID int) error
 	SetConfig(config *internals.Config) error
 	GetConfig() *internals.Config

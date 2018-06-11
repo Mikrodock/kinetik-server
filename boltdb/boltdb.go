@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"kinetik-server/logger"
 	"kinetik-server/models"
 	"kinetik-server/models/internals"
 	"os"
@@ -152,19 +153,33 @@ func (b *BoltDB) GetServices() []*models.Service {
 	return services
 }
 
+func (b *BoltDB) GetService(identifier string) *models.Service {
+	var service *models.Service = &models.Service{}
+
+	b.client.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte("services"))
+		value := bucket.Get([]byte(identifier))
+		logger.StdLog.Println(value)
+		err := json.Unmarshal(value, service)
+		if err != nil {
+			logger.ErrLog.Println("Cannot unmarshal service", err)
+		}
+		return err
+	})
+
+	return service
+}
+
 func (b *BoltDB) AddService(service *models.Service) error {
 	return b.client.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte("services"))
-		id, _ := bucket.NextSequence()
-		idInt := int(id)
-		service.ID = &idInt
 
 		buf, err := json.Marshal(service)
 		if err != nil {
 			return err
 		}
 
-		return bucket.Put(itob(idInt), buf)
+		return bucket.Put([]byte(service.StackName+"/"+service.ServiceName), buf)
 	})
 }
 
@@ -199,19 +214,22 @@ func (b *BoltDB) GetInstances() []*models.Instance {
 	return instances
 }
 
-func (b *BoltDB) AddInstance(instance *models.Instance) error {
+func (b *BoltDB) AddInstance(srv, stack string, instance *models.Instance) error {
 	return b.client.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte("instances"))
-		id, _ := bucket.NextSequence()
-		idInt := int(id)
-		instance.ID = &idInt
+
+		subBucket, err := bucket.CreateBucketIfNotExists([]byte(stack + "/" + srv))
+
+		if err != nil {
+			return err
+		}
 
 		buf, err := json.Marshal(instance)
 		if err != nil {
 			return err
 		}
 
-		return bucket.Put(itob(idInt), buf)
+		return subBucket.Put([]byte(instance.ContainerID), buf)
 	})
 }
 
