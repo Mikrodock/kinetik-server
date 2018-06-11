@@ -249,7 +249,8 @@ func ScaleDown(w http.ResponseWriter, r *http.Request) {
 
 	node := inst.NodeID
 	remoteClient, _ := docker.GetRemoteClient(node)
-	ip, _ := docker.GetContainerIP(remoteClient, node, "mikroverlay")
+	ip, _ := docker.GetContainerIP(remoteClient, inst.ContainerID, "mikroverlay")
+	logger.StdLog.Printf("Scaling down %s/%s : Container %s down with IP %s\n", stack, service, node, ip)
 	control.RemoveFromDNS(service, stack, ip)
 	_ = remoteClient.ContainerStop(ctx, inst.ContainerID, timeoutSeconds(5))
 	_ = remoteClient.ContainerRemove(ctx, inst.ContainerID, dockerTypes.ContainerRemoveOptions{
