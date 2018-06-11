@@ -37,6 +37,7 @@ func AddToDNS(serviceName string, stackName string, ips []IPWithWeight) {
 			if err != nil {
 				panic(err)
 			}
+			defer res.Body.Close()
 			ioutil.ReadAll(res.Body)
 
 			wgI.Done()
@@ -73,6 +74,34 @@ func AddToProxy(serviceName string, stackName string, internalPort int, publicPo
 	proxyIP := "172.18.0." + lastpart
 
 	res, _ := netClient.Post("http://"+proxyIP+":10512/services/", "application/json", jsonBuffer)
+	defer res.Body.Close()
 	ioutil.ReadAll(res.Body)
 
+}
+
+func RemoveFromProxy(serviceName, stackName string) {
+	emptyBuffer := bytes.NewBuffer([]byte{})
+
+	proxyIPParts := strings.Split(data.GetDB().GetConfig().ProxyIP, ".")
+	lastpart := proxyIPParts[len(proxyIPParts)-1]
+	proxyIP := "172.18.0." + lastpart
+
+	res, _ := netClient.Post("http://"+proxyIP+":10512/services/"+stackName+"/"+serviceName, "application/json", emptyBuffer)
+	defer res.Body.Close()
+	ioutil.ReadAll(res.Body)
+}
+
+func RemoveFromDNS(serviceName, stackName, containerIP string) {
+	dnsIPParts := strings.Split(data.GetDB().GetConfig().DNSIP, ".")
+	lastpart := dnsIPParts[len(dnsIPParts)-1]
+	dnsIP := "172.18.0." + lastpart
+
+	req, _ := http.NewRequest("DELETE", "http://"+dnsIP+":8080/api/domains/"+serviceName+"."+stackName+".mikrodock", bytes.NewBufferString(containerIP))
+
+	res, err := netClient.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer res.Body.Close()
+	ioutil.ReadAll(res.Body)
 }
