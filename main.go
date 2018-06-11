@@ -12,6 +12,7 @@ import (
 	"kinetik-server/models"
 	"kinetik-server/models/internals"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"os/signal"
@@ -34,6 +35,8 @@ func init() {
 }
 
 func main() {
+
+	rand.Seed(time.Now().Unix())
 
 	srv, err := daemon.New("kinetik-server", "Server that handles request from nodes")
 	if err != nil {
@@ -206,9 +209,9 @@ func ConfigureRouter(router *mux.Router) {
 	router.HandleFunc("/services", services.GetServices).Methods("GET")
 	router.HandleFunc("/services", services.AddService).Methods("POST")
 
-	router.HandleFunc("/services/{id}", services.DeleteService).Methods("DELETE")
-	router.HandleFunc("/services/{id}/scale/up", services.ScaleUp).Methods("POST")
-	router.HandleFunc("/services/{id}/scale/down", services.ScaleDown).Methods("POST")
+	router.HandleFunc("/services/{stack}/{service}", services.DeleteService).Methods("DELETE")
+	router.HandleFunc("/services/{stack}/{service}/scale/up", services.ScaleUp).Methods("POST")
+	router.HandleFunc("/services/{stack}/{service}/scale/down", services.ScaleDown).Methods("POST")
 
 	router.HandleFunc("/nodes/{id}", nodes.UpdateNode).Methods("POST")
 
