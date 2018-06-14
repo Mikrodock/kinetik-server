@@ -1,12 +1,16 @@
-hash: 49b062c0528cd4162617a2a14a58c809ea70567021175c00eaa86884d279c1bb
-updated: 2018-06-02T18:34:38.918424887+02:00
+hash: 2ee4a0884f857d7f74f51004b601693e2c30e5e0a4b6ccf06d8fdce5eb4b8c40
+updated: 2018-06-14T14:52:17.505166136+02:00
 imports:
 - name: github.com/boltdb/bolt
   version: 2f1ce7a837dcb8da3ec595b1dac9d0632f0f99e8
 - name: github.com/c2h5oh/datasize
   version: 4eba002a5eaea69cf8d235a388fc6b65ae68d2dd
+- name: github.com/deckarep/golang-set
+  version: 1d4478f51bed434f1dadf96dcd9b43aabac66795
+- name: github.com/digitalocean/godo
+  version: 51f18c0e42941703dc13d15bc0ad69aef6a49830
 - name: github.com/docker/cli
-  version: 2014e991ee3ff61c0a479e6278d8b831f67f3261
+  version: 70db8dee744735c9afac30f6a035374e63049441
   subpackages:
   - cli/compose
   - cli/compose/interpolation
@@ -16,7 +20,7 @@ imports:
   - cli/compose/types
   - opts
 - name: github.com/docker/distribution
-  version: f0cc927784781fa395c06317c58dea2841ece3a9
+  version: 749f6afb4572201e3c37325d0ffedb6f32be8950
   subpackages:
   - digestset
   - reference
@@ -53,14 +57,28 @@ imports:
   version: 47565b4f722fb6ceae66b95f853feed578a4a51c
 - name: github.com/docker/libtrust
   version: aabc10ec26b754e797f9028f4589c5b7bd90dc20
+- name: github.com/go-ole/go-ole
+  version: a1ec82a652ebc7e784d7df887cfb31061aeabbcc
+  subpackages:
+  - oleutil
+- name: github.com/golang/protobuf
+  version: 5831880292e721c76b58a16ecc60adc27d8e6355
+  subpackages:
+  - proto
+- name: github.com/google/go-querystring
+  version: 53e6ce116135b80d037921a7fdd5138cf32d7a8a
+  subpackages:
+  - query
 - name: github.com/gorilla/context
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
   version: e3702bed27f0d39777b0b37b664b6280e8ef8fbf
 - name: github.com/imdario/mergo
-  version: 9d5f1277e9a8ed20c3684bda8fde67c05628518c
+  version: 9316a62528ac99aaecb4e47eadd6dc8aa6533d58
+- name: github.com/kballard/go-shellquote
+  version: 95032a82bc518f77982ea72343cc1ade730072f0
 - name: github.com/mattn/go-shellwords
-  version: 39dbbfa24bbc39559b61cae9b20b0e8db0e55525
+  version: f8471b0a71ded0ab910825ee2cf230f25de000f1
 - name: github.com/Microsoft/go-winio
   version: ab35fc04b6365e8fcb18e6e9e41ea4a02b10b175
 - name: github.com/mitchellh/mapstructure
@@ -70,13 +88,25 @@ imports:
 - name: github.com/pkg/errors
   version: 816c9085562cd7ee03e7f8188a1cfd942858cded
 - name: github.com/shirou/gopsutil
-  version: c95755e4bcd7a62bb8bd33f3a597a7c7f35e2cf3
-- name: github.com/sirupsen/logrus
-  version: ea8897e79973357ba785ac2533559a6297e83c44
+  version: eeb1d38d69593f121e060d24d17f7b1f0936b203
+  subpackages:
+  - disk
+  - internal/common
+  - load
 - name: github.com/Sirupsen/logrus
   version: ea8897e79973357ba785ac2533559a6297e83c44
+- name: github.com/sirupsen/logrus
+  version: ea8897e79973357ba785ac2533559a6297e83c44
+- name: github.com/StackExchange/wmi
+  version: cdffdb33acae0e14efff2628f9bae377b597840e
+- name: github.com/subosito/gotenv
+  version: 009e1f9581dc712aba5682a279dee155ca3eeded
 - name: github.com/takama/daemon
   version: aa76b0035d1239b7bb3ae1bd84cd88ef2e0a1f1e
+- name: github.com/tent/http-link-go
+  version: ac974c61c2f990f4115b119354b5e0b47550e888
+- name: github.com/tmc/scp
+  version: f7b48647feef3e30991f2ecc16b2b9a977d9a7c3
 - name: github.com/xeipuuv/gojsonpointer
   version: 4e3ac2762d5f479393488629ee9370b50873b3a6
 - name: github.com/xeipuuv/gojsonreference
@@ -84,24 +114,45 @@ imports:
 - name: github.com/xeipuuv/gojsonschema
   version: 9ff6d6c47f3f5de55acc6f464d6e3719b02818ae
 - name: golang.org/x/crypto
-  version: 5ba7f63082460102a45837dbd1827e10f9479ac0
+  version: 37a17fe027db43f76fd88b056ddf588563fc8722
   subpackages:
+  - curve25519
+  - ed25519
+  - ed25519/internal/edwards25519
+  - internal/chacha20
+  - internal/subtle
+  - poly1305
+  - ssh
   - ssh/terminal
 - name: golang.org/x/net
-  version: 1e491301e022f8f977054da4c2d852decd59571f
+  version: db08ff08e8622530d9ed3a0e8ac279f6d4c02196
   subpackages:
   - context
   - context/ctxhttp
   - internal/socks
   - proxy
+- name: golang.org/x/oauth2
+  version: 1e0a3fa8ba9a5c9eb35c271780101fdaf1b205d7
+  subpackages:
+  - internal
 - name: golang.org/x/sys
-  version: c11f84a56e43e20a78cee75a7c034031ecf57d1f
+  version: 56ede360ec1c541828fb88741b3f1049406d28f5
   subpackages:
   - unix
   - windows
   - windows/registry
   - windows/svc
   - windows/svc/mgr
+- name: google.golang.org/appengine
+  version: b1f26356af11148e710935ed1ac8a7f5702c7612
+  subpackages:
+  - internal
+  - internal/base
+  - internal/datastore
+  - internal/log
+  - internal/remote_api
+  - internal/urlfetch
+  - urlfetch
 - name: gopkg.in/yaml.v2
   version: 5420a8b6744d3b0345ab293f6fcba19c978f1183
 testImports: []

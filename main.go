@@ -19,6 +19,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/subosito/gotenv"
+
 	"github.com/gorilla/mux"
 	"github.com/takama/daemon"
 )
@@ -35,6 +37,8 @@ func init() {
 }
 
 func main() {
+
+	gotenv.Load("/root/.env")
 
 	rand.Seed(time.Now().Unix())
 
@@ -213,6 +217,9 @@ func ConfigureRouter(router *mux.Router) {
 	router.HandleFunc("/services/{stack}/{service}/scale/up", services.ScaleUp).Methods("POST")
 	router.HandleFunc("/services/{stack}/{service}/scale/down", services.ScaleDown).Methods("POST")
 
+	router.HandleFunc("/nodes", nodes.GetNodes).Methods("GET")
+	router.HandleFunc("/nodes", nodes.CreateNode).Methods("POST")
+	router.HandleFunc("/nodes/docker", nodes.StartDocker).Methods("POST")
 	router.HandleFunc("/nodes/{id}", nodes.UpdateNode).Methods("POST")
 
 	router.HandleFunc("/instances", instances.GetInstances).Methods("GET")

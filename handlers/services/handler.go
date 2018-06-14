@@ -53,6 +53,8 @@ func AddService(w http.ResponseWriter, r *http.Request) {
 	srvPorts := make(map[string][]composeTypes.ServicePortConfig)
 	srvConstraints := make(map[string]*composeTypes.Resource)
 
+	workGraph := make(models.Graph, len(config.Services))
+
 	debugMap := make(map[string]interface{})
 
 	mikroverlayConfig := &network.EndpointSettings{
@@ -63,7 +65,10 @@ func AddService(w http.ResponseWriter, r *http.Request) {
 	endsConfig := make(map[string]*network.EndpointSettings)
 	endsConfig["mikroverlay"] = mikroverlayConfig
 
-	for _, srv := range config.Services {
+	for i, srv := range config.Services {
+
+		workGraph[i] = models.NewDepNode(srv.Name, srv.DependsOn)
+
 		contConfig, _ := compose.ConvertServiceToContainer(&srv)
 		contConfig.HostConfig.DNS = []string{data.GetDB().GetConfig().DNSIP}
 		labels["be.mikrodock.stack"] = srvCreateReq.StackName
@@ -86,8 +91,11 @@ func AddService(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	for srvName, config := range srvContainerConfig {
+	depGraph := workGraph.Resolve()
 
+	for _, node := range depGraph {
+		srvName := node.Name
+		config := srvContainerConfig[srvName]
 		serviceModel := models.NewService(srvCreateReq.StackName, srvName, config)
 		serviceModel.Constraints = srvConstraints[srvName]
 		serviceModel.Ports = srvPorts[srvName]

@@ -26,3 +26,5 @@ import:
   version: ^0.3.4
 - package: github.com/shirou/gopsutil
   version: ^2.18.4
+- package: github.com/deckarep/golang-set
+  version: ^1.7.0
