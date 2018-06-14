@@ -2,8 +2,10 @@ package scheduler
 
 import (
 	"kinetik-server/data"
+	"kinetik-server/docker"
 	"kinetik-server/logger"
 	"kinetik-server/models"
+	"sort"
 	"strconv"
 
 	"github.com/docker/cli/cli/compose/types"
@@ -17,7 +19,9 @@ func (ds *NotSoSmartScheduler) SelectWithConstraints(resources *types.Resource) 
 	var ipnode string
 
 	nodes := data.GetDB().GetNodes()
-	for ip, nodeSpec := range nodes {
+	ordList := orderByContainerCount(nodes)
+	for _, ip := range ordList {
+		nodeSpec := nodes[ip]
 		if resources == nil {
 			return ip, nil
 		}
@@ -36,7 +40,6 @@ func (ds *NotSoSmartScheduler) SelectWithConstraints(resources *types.Resource) 
 			}
 		}
 	}
-
 	if node != nil {
 		data.GetDB().AddNode(ipnode, node)
 
@@ -46,4 +49,19 @@ func (ds *NotSoSmartScheduler) SelectWithConstraints(resources *types.Resource) 
 	}
 
 	return "", nil
+}
+
+func orderByContainerCount(nodes map[string]*models.Node) []string {
+	keys := make([]string, 0, len(nodes))
+	for k := range nodes {
+		keys = append(keys, k)
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		cntI := docker.GetContainersCount(keys[i])
+		cntJ := docker.GetContainersCount(keys[j])
+		return cntI < cntJ
+	})
+
+	return keys
+
 }

@@ -208,3 +208,17 @@ func WaitForMikroverlayNetwork() {
 	}
 
 }
+
+func GetContainersCount(remoteIP string) int {
+	cli, err := GetRemoteClient(remoteIP)
+	defer cli.Close()
+	if err != nil {
+		return -1
+	}
+	cnts, err := cli.ContainerList(context.Background(), types.ContainerListOptions{})
+	if err != nil {
+		return -1
+	}
+	return len(cnts)
+
+}
