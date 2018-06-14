@@ -44,12 +44,13 @@ func ConvertServiceToContainer(srvConfig *types.ServiceConfig) (*dockerTypes.Con
 	cntCreateConfig := &dockerTypes.ContainerCreateConfig{
 		Name: srvConfig.ContainerName,
 		Config: &container.Config{
-			Cmd:        []string(srvConfig.Command),
-			Domainname: srvConfig.DomainName,
-			Entrypoint: []string(srvConfig.Entrypoint),
-			Env:        convertEnv(srvConfig.Environment),
-			Hostname:   srvConfig.Hostname,
-			Image:      srvConfig.Image,
+			Cmd:         []string(srvConfig.Command),
+			Domainname:  srvConfig.DomainName,
+			Entrypoint:  []string(srvConfig.Entrypoint),
+			Env:         convertEnv(srvConfig.Environment),
+			Healthcheck: convertHC(srvConfig.HealthCheck),
+			Hostname:    srvConfig.Hostname,
+			Image:       srvConfig.Image,
 			// Labels also
 			MacAddress: srvConfig.MacAddress,
 			OpenStdin:  srvConfig.StdinOpen,
@@ -59,8 +60,9 @@ func ConvertServiceToContainer(srvConfig *types.ServiceConfig) (*dockerTypes.Con
 			WorkingDir: srvConfig.WorkingDir,
 		},
 		HostConfig: &container.HostConfig{
-			CapAdd:  srvConfig.CapAdd,
-			CapDrop: srvConfig.CapDrop,
+			CapAdd:     srvConfig.CapAdd,
+			CapDrop:    srvConfig.CapDrop,
+			ExtraHosts: srvConfig.ExtraHosts,
 			// DNS => use MikroDNS
 			// DNSSearch => stack.mikrodock
 			Privileged: srvConfig.Privileged,
@@ -73,4 +75,23 @@ func ConvertServiceToContainer(srvConfig *types.ServiceConfig) (*dockerTypes.Con
 	}
 
 	return cntCreateConfig, nil
+}
+
+func convertHC(composehealth *types.HealthCheckConfig) *container.HealthConfig {
+	ret := &container.HealthConfig{
+		Test: composehealth.Test,
+	}
+	if composehealth.Interval != nil {
+		ret.Interval = *composehealth.Interval
+	}
+	if composehealth.Retries != nil {
+		ret.Retries = int(*composehealth.Retries)
+	}
+	if composehealth.StartPeriod != nil {
+		ret.StartPeriod = *composehealth.StartPeriod
+	}
+	if composehealth.Timeout != nil {
+		ret.Timeout = *composehealth.Timeout
+	}
+	return ret
 }
