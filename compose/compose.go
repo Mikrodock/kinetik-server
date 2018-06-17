@@ -78,8 +78,12 @@ func ConvertServiceToContainer(srvConfig *types.ServiceConfig) (*dockerTypes.Con
 }
 
 func convertHC(composehealth *types.HealthCheckConfig) *container.HealthConfig {
-	ret := &container.HealthConfig{
-		Test: composehealth.Test,
+	if composehealth == nil {
+		return nil
+	}
+	ret := &container.HealthConfig{}
+	if composehealth.Test != nil {
+		ret.Test = composehealth.Test
 	}
 	if composehealth.Interval != nil {
 		ret.Interval = *composehealth.Interval

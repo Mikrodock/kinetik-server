@@ -15,6 +15,7 @@ import (
 	"math/rand"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	composeTypes "github.com/docker/cli/cli/compose/types"
@@ -23,6 +24,8 @@ import (
 
 	"github.com/gorilla/mux"
 )
+
+var mu sync.Mutex
 
 func GetServices(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(data.GetDB().GetServices())
@@ -67,7 +70,7 @@ func AddService(w http.ResponseWriter, r *http.Request) {
 
 	for i, srv := range config.Services {
 
-		workGraph[i] = models.NewDepNode(srv.Name, srv.DependsOn)
+		workGraph[i] = models.NewDepNode(srv.Name, srv.DependsOn...)
 
 		contConfig, _ := compose.ConvertServiceToContainer(&srv)
 		contConfig.HostConfig.DNS = []string{data.GetDB().GetConfig().DNSIP}
@@ -91,7 +94,7 @@ func AddService(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	depGraph := workGraph.Resolve()
+	depGraph, err := workGraph.Resolve()
 
 	for _, node := range depGraph {
 		srvName := node.Name
@@ -217,10 +220,14 @@ func ScaleUp(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Cannot run service "+srv.ServiceName+" : "+err.Error(), 500)
 	}
 
+	mu.Lock()
+	srv = data.GetDB().GetService(stack + "/" + service)
 	srv.AddInstance(&models.Instance{
 		ContainerID: id,
 		NodeID:      nodeIP,
 	})
+	data.GetDB().AddService(srv)
+	mu.Unlock()
 
 	control.AddToDNS(srv.ServiceName, srv.StackName, []control.IPWithWeight{control.IPWithWeight{
 		IP:     ip,
@@ -237,7 +244,7 @@ func ScaleUp(w http.ResponseWriter, r *http.Request) {
 		iptables.NewLinkPort(proxyIP, int(portConfig.Published), int(portConfig.Target))
 	}
 
-	data.GetDB().AddService(srv)
+	w.Write([]byte(id))
 }
 
 func ScaleDown(w http.ResponseWriter, r *http.Request) {
@@ -268,5 +275,7 @@ func ScaleDown(w http.ResponseWriter, r *http.Request) {
 	srv.Instances = append(srv.Instances[:idx], srv.Instances[idx+1:]...)
 
 	data.GetDB().AddService(srv)
+
+	w.Write([]byte(node))
 
 }
